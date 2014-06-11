@@ -49,11 +49,12 @@ qwebirc.ui.QUI = new Class({
     }.bind(this));
     
     this.createInput();
+    this.addIconMenu();
     this.reflow();
     this.reflow.delay(100); /* Konqueror fix */
     
     /* HACK, in Chrome this should work immediately but doesn't */
-    this.__createDropdownHint.delay(100, this);
+    //this.__createDropdownHint.delay(100, this);
   },
   __createDropdownMenu: function() {
     var dropdownMenu = new Element("span");
@@ -149,6 +150,7 @@ qwebirc.ui.QUI = new Class({
     form.appendChild(inputbox);
     this.inputbox = inputbox;
     this.inputbox.maxLength = 470;
+    this.inputbox.setAttribute("placeholder", "Type your message...");
 
     var sendInput = function() {
       if(inputbox.value == "")
@@ -159,30 +161,32 @@ qwebirc.ui.QUI = new Class({
       inputbox.value = "";
     }.bind(this);
 
-    if(!qwebirc.util.deviceHasKeyboard()) {
-      inputbox.addClass("mobile-input");
-      var inputButton = new Element("input", {type: "button"});
-      inputButton.addClass("mobile-button");
-      inputButton.addEvent("click", function() {
-        sendInput();
-        inputbox.focus();
-      });
-      inputButton.value = ">";
-      this.input.appendChild(inputButton);
-      var reflowButton = function() {
-        var containerSize = this.input.getSize();
-        var buttonSize = inputButton.getSize();
-        
-        var buttonLeft = containerSize.x - buttonSize.x - 5; /* lovely 5 */
-
-        inputButton.setStyle("left", buttonLeft);
-        inputbox.setStyle("width", buttonLeft - 5);
-        inputButton.setStyle("height", containerSize.y);
-      }.bind(this);
-      this.qjsui.addEvent("reflow", reflowButton);
-    } else {
-      inputbox.addClass("keyboard-input");
-    }
+    //if(!qwebirc.util.deviceHasKeyboard()) {
+    //  inputbox.addClass("mobile-input");
+    //  var inputButton = new Element("input", {type: "button"});
+    //  inputButton.addClass("mobile-button");
+    //  inputButton.addEvent("click", function() {
+    //    sendInput();
+    //    inputbox.focus();
+    //  });
+    //  inputButton.value = ">";
+    //  this.input.appendChild(inputButton);
+    //  var reflowButton = function() {
+    //    var containerSize = this.input.getSize();
+    //    var buttonSize = inputButton.getSize();
+    //    
+    //    var buttonLeft = containerSize.x - buttonSize.x - 5; /* lovely 5 */
+    //
+    //    inputButton.setStyle("left", buttonLeft);
+    //    inputbox.setStyle("width", buttonLeft - 5);
+    //    inputButton.setStyle("height", containerSize.y);
+    //  }.bind(this);
+    //  this.qjsui.addEvent("reflow", reflowButton);
+    //} else {
+    //  inputbox.addClass("keyboard-input");
+    //}
+    inputbox.addClass("keyboard-input");
+    inputbox.id = "message-input";
     
     form.addEvent("submit", function(e) {
       new Event(e).stop();
@@ -200,7 +204,8 @@ qwebirc.ui.QUI = new Class({
         resultfn = this.commandhistory.upLine;
       } else if(e.key == "down") {
         resultfn = this.commandhistory.downLine;
-      } else if(e.key == "tab" && !e.altKey && !e.ctrlKey && !e.shiftKey) {
+      //} else if(e.key == "tab" && !e.altKey && !e.ctrlKey && !e.shiftKey) { // FIXME: is this what we really mean?
+      } else if(e.key == "tab") {
         new Event(e).stop();
         this.tabComplete(inputbox);
         return;
@@ -224,6 +229,19 @@ qwebirc.ui.QUI = new Class({
       inputbox.value = result;
       qwebirc.util.setAtEnd(inputbox);
     }.bind(this));
+  },
+  addIconMenu: function() {
+    var iconMenu = new Element("div");
+    iconMenu.id = "icon-menu";
+    this.input.appendChild(iconMenu);
+    var menuButton = new Element("a");
+    menuButton.id = "icon-menu-button";
+    menuButton.href = "#";
+    menuButton.innerHTML = '<i class="fa fa-puzzle-piece"></i><span class="sr">Icon Menu</span>';
+    iconMenu.appendChild(menuButton);
+    var menuWrapper = new Element("div");
+    menuWrapper.id = "icon-menu-wrapper";
+    iconMenu.appendChild(menuWrapper);
   },
   setLines: function(lines) {
     this.lines.parentNode.replaceChild(lines, this.lines);
@@ -420,6 +438,26 @@ qwebirc.ui.QUI.Window = new Class({
       this.topic.addEvent("dblclick", this.editTopic.bind(this));
       this.parentObject.qjsui.applyClasses("topic", this.topic);
       
+      this.iconMenuWrapper = document.getElementById('icon-menu-wrapper');
+      for (var i=0; i<this.iconsAllowed.length; i++) {
+        var iconToAdd = new Element("a");
+        iconToAdd.href = "#";
+        iconToAdd.className = "icon-menu-item";
+        iconToAdd.setAttribute("data-icon-name", ":" + this.iconsAllowed[i] + ":");
+        iconToAdd.innerHTML = '<i class="fa fa-' + this.iconsAllowed[i] + '"></i><span class="sr">' + this.iconsAllowed[i] + '</span>';
+        this.iconMenuWrapper.appendChild(iconToAdd);
+      }
+      
+      function addIconToInput() {
+        event.preventDefault();
+        document.getElementById('message-input').value += this.getAttribute("data-icon-name");
+        document.getElementById('message-input').focus();
+      }
+      
+      for (var i=0; i<this.iconMenuWrapper.children.length; i++) {
+        this.iconMenuWrapper.children[i].onclick = addIconToInput;
+      }
+      
       this.prevNick = null;
       this.nicklist = new Element("div");
       this.nicklist.addClass("nicklist");
@@ -522,34 +560,42 @@ qwebirc.ui.QUI.Window = new Class({
     
     var e = new Element("a");
     qwebirc.ui.insertAt(position, this.nicklist, e);
+    e.className = "nick";
     
-    e.href = "#";
     var span = new Element("span");
     if(this.parentObject.uiOptions.NICK_COLOURS) {
       var colour = realNick.toHSBColour(this.client);
       if($defined(colour))
         span.setStyle("color", colour.rgbToHex());
     }
-    span.set("text", nick);
+    
+    if (nick.charAt(0) === "$") { // GGG server ops get icon in nicklist
+      nick = '<i class="fa fa-tree"></i> ' + nick.substring(1, nick.length);
+    }
+    if (nick.charAt(0) === "@") { // GGG ops get icon in nicklist
+      nick = '<i class="fa fa-graduation-cap"></i> ' + nick.substring(1, nick.length);
+    }
+    span.innerHTML = nick;
     e.appendChild(span);
     
     e.realNick = realNick;
     
-    e.addEvent("click", function(x) {
-      if(this.prevNick == e) {
-        this.removePrevMenu();
-        return;
-      }
-      
-      this.removePrevMenu();
-      this.prevNick = e;
-      e.addClass("selected");
-      this.moveMenuClass();
-      e.menu = this.createMenu(e.realNick, e);
-      new Event(x).stop();
-    }.bind(this));
+    //e.addEvent("click", function(x) { // GGG commented out nicklist event code
+    //  if(this.prevNick == e) {
+    //    this.removePrevMenu();
+    //    return;
+    //  }
+    //  
+    //  this.removePrevMenu();
+    //  this.prevNick = e;
+    //  e.addClass("selected");
+    //  this.moveMenuClass();
+    //  e.menu = this.createMenu(e.realNick, e);
+    //  new Event(x).stop();
+    //}.bind(this));
+    //
+    //e.addEvent("focus", function() { this.blur() }.bind(e));
     
-    e.addEvent("focus", function() { this.blur() }.bind(e));
     this.moveMenuClass();
     return e;
   },
@@ -635,9 +681,21 @@ qwebirc.ui.QUI.Window = new Class({
     } else {
       e.addClass("linestyle2");
     }
+    e.addClass("msg-line"); // GGG 
+    if (line['our']) { e.addClass("our-msg"); } // JRBL & GGG
     this.lastcolour = !this.lastcolour;
-
-    this.parent(type, line, colourClass, e);
+    
+    if (line['@']) {    // GGG detect op messages, add class, and remove @ char
+      e.addClass('op-msg msg-icon');
+      delete line["@"];
+    }
+    
+    if (type === "OURJOIN") {
+      e.addClass('join-msg msg-icon');
+      document.getElementById("loading-pane").style.display = "none"; // GGG hide loading pane
+    }
+    
+    this.parent(type, line, colourClass, e); // NOTE FROM GGG: THIS CALLS baseuiwindow.addLine()
   },
   setHilighted: function(state) {
     var laststate = this.hilighted;

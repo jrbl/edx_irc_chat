@@ -4,13 +4,7 @@ qwebirc.irc.Commands = new Class({
     this.parent(parentObject);
     
     this.aliases = {
-      "J": "JOIN",
-      "K": "KICK",
-      "MSG": "PRIVMSG",
-      "Q": "QUERY",
-      "BACK": "AWAY",
-      "PRIVACY": "PRIVACYPOLICY",
-      "HOP": "CYCLE"
+      "MSG": "PRIVMSG"
     };
   },
   
@@ -35,6 +29,7 @@ qwebirc.irc.Commands = new Class({
     this.newQueryLine(target, "ACTION", args, {"@": this.parentObject.getNickStatus(target, this.parentObject.nickname)});
   }],
   cmd_CTCP: [false, 3, 2, function(args) {
+    return; // disabled by JRBL
     var target = args[0];
     var type = args[1].toUpperCase();
     var message = args[2];
@@ -74,6 +69,7 @@ qwebirc.irc.Commands = new Class({
     }
   }],
   cmd_QUERY: [false, 2, 1, function(args) {
+    return; // disabled by JRBL
     if(this.parentObject.isChannel(args[0])) {
       this.getActiveWindow().errorMessage("Can't target a channel with this command.");
       return;
@@ -94,21 +90,27 @@ qwebirc.irc.Commands = new Class({
     this.parentObject.ui.logout();
   }],
   cmd_OPTIONS: [false, undefined, undefined, function(args) {
+    return; // disabled by JRBL
     this.newUIWindow("optionsWindow");
   }],
   cmd_EMBED: [false, undefined, undefined, function(args) {
+    return; // disabled by JRBL
     this.newUIWindow("embeddedWindow");
   }],
   cmd_PRIVACYPOLICY: [false, undefined, undefined, function(args) {
+    return; // disabled by JRBL
     this.newUIWindow("privacyWindow");
   }],
   cmd_ABOUT: [false, undefined, undefined, function(args) {
+    return; // disabled by JRBL
     this.newUIWindow("aboutWindow");
   }],
   cmd_QUOTE: [false, 1, 1, function(args) {
+    return; // disabled by JRBL
     this.send(args[0]);
   }],
   cmd_KICK: [true, 2, 1, function(args) {
+    return; // disabled by JRBL
     var channel = this.getActiveWindow().name;
     
     var message = "";
@@ -141,21 +143,51 @@ qwebirc.irc.Commands = new Class({
     this.automode("-", "v", args);
   }],
   cmd_TOPIC: [true, 1, 1, function(args) {
+    return; // disabled by JRBL
     this.send("TOPIC " + this.getActiveWindow().name + " :" + args[0]);
   }],
   cmd_AWAY: [false, 1, 0, function(args) {
+    return; // disabled by JRBL
     this.send("AWAY :" + (args?args[0]:""));
   }],
   cmd_QUIT: [false, 1, 0, function(args) {
     this.send("QUIT :" + (args?args[0]:""));
   }],
   cmd_CYCLE: [true, 1, 0, function(args) {
+    return; // disabled by JRBL
     var c = this.getActiveWindow().name;
     
     this.send("PART " + c + " :" + (args?args[0]:"rejoining. . ."));
     this.send("JOIN " + c);
   }],
+  cmd_CONSTRAINED_JOIN: [false, 2, 1, function(args) {
+    var channels = args.shift();
+    /*
+    var schans = channels.split(",");
+    var fchans = [];
+    
+    var warn = false;
+    
+    schans.forEach(function(x) {
+      if(!this.parentObject.isChannel(x)) {
+        x = "#" + x;
+        // JRBL // warn = true;
+      }
+      fchans.push(x);
+    }.bind(this));
+
+    if(warn) {
+      var delayinfo = function() {
+        this.getActiveWindow().infoMessage("Channel names begin with # (corrected automatically).");
+      }.bind(this).delay(250);
+    }
+      */
+    //if (this.parentObject.isChannel(channels)) { channels = '#' + channels; }
+    this.send("JOIN " + channels + " " + args.join(" "));
+    //this.send("JOIN " + fchans.join(",") + " " + args.join(" "));
+  }],
   cmd_JOIN: [false, 2, 1, function(args) {
+    return; // disabled by JRBL
     var channels = args.shift();
     
     var schans = channels.split(",");
@@ -166,7 +198,7 @@ qwebirc.irc.Commands = new Class({
     schans.forEach(function(x) {
       if(!this.parentObject.isChannel(x)) {
         x = "#" + x;
-        warn = true;
+        // JRBL // warn = true;
       }
       fchans.push(x);
     }.bind(this));
@@ -183,10 +215,11 @@ qwebirc.irc.Commands = new Class({
     this.send("MODE " + this.parentObject.getNickname() + (args?(" " + args[0]):""));
   }],
   cmd_BEEP: [false, undefined, undefined, function(args) {
+    return; // disabled by JRBL
     this.parentObject.ui.beep();
   }],
   cmd_AUTOJOIN: [false, undefined, undefined, function(args) {
-    return ["JOIN", this.parentObject.options.autojoin];
+    return ["CONSTRAINED_JOIN", this.parentObject.options.autojoin];
   }],
   cmd_CLEAR: [false, undefined, undefined, function(args) {
     var w = this.getActiveWindow().lines;
@@ -194,6 +227,7 @@ qwebirc.irc.Commands = new Class({
       w.removeChild(w.firstChild);
   }],
   cmd_PART: [false, 2, 0, function(args) {
+    return; // disabled by JRBL
     var w = this.getActiveWindow();
     var message = "";
     var channel;

@@ -1,6 +1,6 @@
 function qwebirc_ui_onbeforeunload(e) { /* IE sucks */
 // dcc - disabled warning when leaving - annoying when chat is autoloaded
-/*
+/* 
   if(qwebirc.connected) {
     var message = "This action will close all active IRC connections.";
     var e = e || window.event;
@@ -45,13 +45,26 @@ qwebirc.ui.Interface = new Class({
     };
 
     window.addEvent("domready", function() {
+      
+      // GGG adds loading pane
+      var loadingPane = document.createElement("div");
+      loadingPane.id = "loading-pane";
+      loadingPane.innerHTML = '<h2 class="loading-heading"><i class="fa fa-spinner fa-spin"></i> Loading...</h2><p id="loading-error"></p>';
+      document.body.appendChild(loadingPane); // JRBL & GGG
+      // end loading pane
+      
       var callback = function(options) {
         var IRC = new qwebirc.irc.IRCClient(options, ui_);
+        var connected = function() { var value = false; }
         IRC.connect();
-        window.onbeforeunload = qwebirc_ui_onbeforeunload;
-        window.addEvent("unload", function() {
+        
+        window.onbeforeunload = function(e) { // GGG added quit on page close
           IRC.quit("Page closed");
-        });
+        };
+        // window.onbeforeunload = qwebirc_ui_onbeforeunload; //  JRBL
+        /* window.addEvent("unload", function() {
+          IRC.quit("Page closed");
+        });*/  // GGG
       };
 
       var inick = null;

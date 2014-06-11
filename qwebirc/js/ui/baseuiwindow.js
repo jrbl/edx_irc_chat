@@ -26,6 +26,15 @@ qwebirc.ui.Window = new Class({
     this.subWindow = null;
     this.closed = false;
     
+    // GGG list of allowed FontAwesome icons!
+    this.iconsAllowed = ["anchor", "beer", "bell", "bolt", "bomb", "book", "briefcase", "bug", "bullhorn", "camera",
+                         "camera-retro", "car", "check", "cloud", "coffee", "comment", "comments", "compass", "cube",
+                         "cutlery", "envelope", "fighter-jet", "fire-extinguisher", "flag", "flag-checkered", "flask",
+                         "gamepad", "gavel", "gift", "globe", "graduation-cap", "heart", "home", "key", "leaf",
+                         "life-ring", "magic", "money", "music", "paper-plane", "paw", "pencil", "plane", "puzzle-piece",
+                         "recycle", "road", "rocket", "space-shuttle", "star", "suitcase", "taxi", "thumb-tack",
+                         "thumbs-down", "thumbs-up", "ticket", "tree", "trophy", "truck", "umbrella", "wrench"];
+    
     if(this.type & qwebirc.ui.WINDOW_LASTLINE) {
       this.lastPositionLine = new Element("hr");
       this.lastPositionLine.addClass("lastpos");
@@ -136,6 +145,42 @@ qwebirc.ui.Window = new Class({
     element.appendChild(tsE);
     
     qwebirc.ui.Colourise(line, element, this.client.exec, this.parentObject.urlDispatcher.bind(this.parentObject), this);
+    
+    if (element.hasClass('msg-icon')) {
+      var opUser = element.childNodes[1].childNodes[1];
+      var space = document.createTextNode(" ");
+      opUser.insertBefore(space, opUser.firstChild);
+      var icon = document.createElement("i");
+      
+      if (element.hasClass('op-msg')) { //   GGG see if message is op, then add op icon.
+        icon.className = "fa fa-graduation-cap";
+      } else if (element.hasClass('join-msg')) {
+        icon.className = "fa fa-tree";
+      }
+      
+      opUser.insertBefore(icon, opUser.firstChild);
+    }
+    
+    // GGG icons from list at top of file replace with FontAwesome icons!
+    var icons = element.innerHTML.match(/:[a-z]*-*[a-z]*:/g);
+    if (icons !== null) {
+      for (var i=0; i<icons.length; i++) {
+        var iconReplace = icons[i]
+        var icon = iconReplace.substring(1, iconReplace.length-1);
+        
+        if (this.iconsAllowed.indexOf(icon) >= 0) {
+          var iconElem = document.createElement("i");
+          var iconClass = "fa fa-" + icon;
+          iconElem.className = iconClass;
+          
+          var elemContainer = document.createElement("div");
+          elemContainer.appendChild(iconElem);
+          element.innerHTML = element.innerHTML.replace(iconReplace, elemContainer.innerHTML)
+        }
+      }
+    }
+    // end message icon replacement
+    
     this.scrollAdd(element);
   },
   errorMessage: function(message) {
@@ -185,11 +230,14 @@ qwebirc.ui.Window = new Class({
   },
   scrollAdd: function(element) {
     var parent = this.lines;
+    var oldBottomOffset = parent.scrollHeight - parent.clientHeight - parent.scrollTop;
+    var reading = oldBottomOffset > (parent.clientHeight/2);
     
     /* scroll in bursts, else the browser gets really slow */
     if($defined(element)) {
       var sd = this.scrolledDown();
       parent.appendChild(element);
+      
       if(parent.childNodes.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW)
         parent.removeChild(parent.firstChild);
       if(sd) {
@@ -197,12 +245,18 @@ qwebirc.ui.Window = new Class({
           $clear(this.scrolltimer);
         this.scrolltimer = this.scrollAdd.delay(50, this, [null]);
       } else {
-        this.scrollToBottom();
-        this.scrolltimer = null;
+        if (!reading) {
+          this.scrollToBottom();
+          reading = false;
+          this.scrolltimer = null;
+        }
       }
     } else {
-      this.scrollToBottom();
-      this.scrolltimer = null;
+      if (!reading) {
+        this.scrollToBottom();
+        reading = false;
+        this.scrolltimer = null;
+      }
     }
   },
   updateNickList: function(nicks) {
