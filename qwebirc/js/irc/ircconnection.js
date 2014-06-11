@@ -4,15 +4,19 @@ qwebirc.irc.IRCConnection = new Class({
   Implements: [Events, Options],
   options: {
     initialNickname: "ircconnX",
-    minTimeout: 45000,
+    //minTimeout: 45000,
+    minTimeout: 30000,
+    //initialTimeout: 65000,
+    //timeoutIncrement: 10000,
+    timeoutIncrement: 5000,
     maxTimeout: 5 * 60000,
-    timeoutIncrement: 10000,
-    initialTimeout: 65000,
+    //maxRetries: 5,
+    maxRetries: 10,
     floodInterval: 200,
     floodMax: 10,
     floodReset: 5000,
-    errorAlert: true,
-    maxRetries: 5,
+    //errorAlert: true,
+    errorAlert: false,
     serverPassword: null
   },
   initialize: function(options) {
@@ -30,17 +34,20 @@ qwebirc.irc.IRCConnection = new Class({
     this.__retryAttempts = 0;
     
     this.__timeoutId = null;
-    this.__timeout = this.options.initialTimeout;
+    this.__timeout = this.options.minTimeout;
+    this.__retryTimeout = this.options.timeoutIncrement;
     this.__lastActiveRequest = null;
     this.__activeRequest = null;
     
     this.__sendQueue = [];
     this.__sendQueueActive = false;
   },
-  __error: function(text) {
-    this.fireEvent("error", text);
+  __error: function(text1, text2) {
+    this.fireEvent("error", text1);
+    document.getElementById("loading-pane").style.display = "block"; // GGG show loading pane
+    document.getElementById("loading-error").innerHTML = "Error: " + text1 + "<br /><br />" + text2;
     if(this.options.errorAlert)
-      alert(text);
+      alert(text1);
   },
   newRequest: function(url, floodProtection, synchronous) {
     if(this.disconnected)
@@ -48,7 +55,7 @@ qwebirc.irc.IRCConnection = new Class({
       
     if(floodProtection && !this.disconnected && this.__isFlooding()) {
       this.disconnect();
-      this.__error("BUG: uncontrolled flood detected -- disconnected.");
+      this.__error("Uncontrolled flood detected -- You have been disconnected.", "Please try refreshing your browser.");
     }
     
     var asynchronous = true;
@@ -136,7 +143,7 @@ qwebirc.irc.IRCConnection = new Class({
         
         if(!this.disconnected) {
           this.disconnected = true;
-          this.__error("An error occured: " + o[1]);
+          this.__error("An error occured: " + o[1], "Please try refreshing your browser.");
         }
         return false;
       }
@@ -150,7 +157,8 @@ qwebirc.irc.IRCConnection = new Class({
     if(o[0] == false) {
       if(!this.disconnected) {
         this.disconnected = true;
-        this.__error("An error occured: " + o[1]);
+        this.__error("Invalid session, this most likely means the server has restarted.", "Refreshing chat in 5 seconds.");
+        setTimeout(window.location.href = window.location.href, this.options.timeoutIncrement); // GGG reload iframe after server is back.
       }
       return false;
     }
@@ -182,23 +190,29 @@ qwebirc.irc.IRCConnection = new Class({
         
     this.__activeRequest.__replaced = true;
     this.__lastActiveRequest = this.__activeRequest;
-      
-    if(this.__timeout + this.options.timeoutIncrement <= this.options.maxTimeout)
+    
+    if(this.__timeout + this.options.timeoutIncrement <= this.options.maxTimeout) {
       this.__timeout+=this.options.timeoutIncrement;
-        
+    } else {
+      this.__timeout=this.options.maxTimeout;
+    }
+
     this.recv();
   },
   __checkRetries: function() {
     /* hmm, something went wrong! */
     if(this.__retryAttempts++ >= this.options.maxRetries && !this.disconnected) {
       this.disconnect();
-      
-      this.__error("Error: connection closed after several requests failed.");
+      this.__error("Connection closed after several requests failed.", "Please try refreshing your browser.");
       return false;
     }
     
-    if(this.__timeout - this.options.timeoutIncrement >= this.options.minTimeout)
-      this.__timeout-=this.options.timeoutIncrement;
+    document.getElementById("loading-pane").style.display = "block"; // GGG show loading pane
+    document.getElementById("loading-error").innerHTML = "";
+    
+    //if(this.__timeout - this.options.timeoutIncrement >= this.options.minTimeout) // GGG & JRBL removed
+    //  this.__timeout-=this.options.timeoutIncrement;
+    this.__retryTimeout += (this.options.timeoutIncrement * this.__retryAttempts);
 
     return true;
   },
@@ -229,7 +243,7 @@ qwebirc.irc.IRCConnection = new Class({
           return;
           
         if(this.__checkRetries())
-          this.recv();
+          this.recv.delay(this.__retryTimeout, this);
         return;
       }
       
@@ -249,12 +263,13 @@ qwebirc.irc.IRCConnection = new Class({
     r.addEvent("complete", function(o) {
       if(!o) {
         this.disconnected = true;
-        this.__error("Couldn't connect to remote server.");
+        this.__error("Couldn't connect to remote server.", "Please try refreshing your browser.");
         return;
       }
       if(o[0] == false) {
         this.disconnect();
-        this.__error("An error occured: " + o[1]);
+        this.__error("An error occured: " + o[1], "Please try refreshing your browser.");
+        setTimeout(location.reload, this.options.timeoutIncrement);
         return;
       }
       this.sessionid = o[1];
@@ -265,7 +280,7 @@ qwebirc.irc.IRCConnection = new Class({
     var postdata = "nick=" + encodeURIComponent(this.initialNickname);
     if($defined(this.options.serverPassword))
       postdata+="&password=" + encodeURIComponent(this.options.serverPassword);
-      
+    
     r.send(postdata);
   },
   __cancelRequests: function() {

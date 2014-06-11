@@ -1,7 +1,7 @@
 .qwebirc-uglyui .tabbar {
   border: 1px solid black;
   padding: 4px;
-  font-family: Verdana, Arial;
+  font-family: "Lucida Console", sans-serif;
 }
 
 .qwebirc-uglyui .tab {
@@ -47,7 +47,7 @@
 }
 
 .qwebirc-uglyui .outercontainer {
-  font-family: Verdana, Arial;
+  font-family: Lucida Console;
 }
 
 .qwebirc-uglyui .innercontainer {

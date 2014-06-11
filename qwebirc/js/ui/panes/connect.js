@@ -1,8 +1,10 @@
 qwebirc.ui.GenericLoginBox = function(parentElement, callback, initialNickname, initialChannels, autoConnect, autoNick, networkName) {
   if(autoConnect) {
-    // dcc - Force login immediately with no confirm
+    // dcoetzee - Force login immediately with no confirm
     // qwebirc.ui.ConfirmBox(parentElement, callback, initialNickname, initialChannels, autoNick, networkName);
-    callback({"nickname": initialNickname, "autojoin": initialChannels});
+    //callback({"nickname": initialNickname, "autojoin": initialChannels});
+    // JRBL we push callback calling deeper down to make things work more consistently
+    qwebirc.ui.ConfirmBox(parentElement, callback, initialNickname, initialChannels, autoNick, networkName);
   } else {
     qwebirc.ui.LoginBox(parentElement, callback, initialNickname, initialChannels, networkName);
   }
@@ -72,14 +74,16 @@ qwebirc.ui.ConfirmBox = function(parentElement, callback, initialNickname, initi
   
   var td = new Element("td");
   tr.appendChild(td);
+  
+  var scrubbedNick = qwebirc.global.nicknameValidator.validate(initialNickname);
 
   var yes = new Element("input", {"type": "submit", "value": "Connect"});
   td.appendChild(yes);
   yes.addEvent("click", function(e) {
     parentElement.removeChild(outerbox);
-    callback({"nickname": initialNickname, "autojoin": initialChannels});
+    callback({"nickname": scrubbedNick, "autojoin": initialChannels});
   });
-  
+
   if(qwebirc.auth.enabled() && qwebirc.auth.quakeNetAuth() && !qwebirc.auth.loggedin()) {
     var auth = new Element("input", {"type": "submit", "value": "Log in"});
     td.appendChild(auth);
@@ -88,6 +92,10 @@ qwebirc.ui.ConfirmBox = function(parentElement, callback, initialNickname, initi
   
   if(window == window.top) 
     yes.focus();
+
+  /* JRBL */ 
+  parentElement.removeChild(outerbox);
+  callback({"nickname": scrubbedNick, "autojoin": initialChannels});
 }
 
 qwebirc.ui.LoginBox = function(parentElement, callback, initialNickname, initialChannels, networkName) {
@@ -205,11 +213,13 @@ qwebirc.ui.LoginBox = function(parentElement, callback, initialNickname, initial
       return;
     }
     var stripped = qwebirc.global.nicknameValidator.validate(nickname);
-    if(stripped != nickname) {
-      nick.value = stripped;
+    if(stripped !== nickname) {
+      /* nick.value = stripped;
       alert("Your nickname was invalid and has been corrected; please check your altered nickname and press Connect again.");
       nick.focus();
-      return;
+      return; */
+      nickname = stripped; // GGG autocorrect invalid nicks and autoconnect.
+      /* Counts on name validator that returns corrected values */
     }
     
     var data = {"nickname": nickname, "autojoin": chans};
