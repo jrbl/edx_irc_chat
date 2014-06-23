@@ -126,9 +126,18 @@ qwebirc.irc.BaseIRCClient = new Class({
     return true;
   },
   irc_NICK: function(prefix, params) {
+    /* this is called for both local and remote nickname updates */
+    // FIXME: /nick update skip doesn't work
     var user = prefix;
     var oldnick = user.hostToNick();
     var newnick = params[0];
+
+    if (this.nickname == oldnick) {
+      /* Actually nevermind below; if this is a local nickname update, don't do it! */
+      return true;
+      /* If this is a local nickname update, stick to our validation rules. */
+      newnick = qwebirc.global.nicknameValidator.validate(newnick);
+    }
     
     if(this.nickname == oldnick) {
       this.nickname = newnick;

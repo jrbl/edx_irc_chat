@@ -29,18 +29,21 @@ qwebirc.config.DEFAULT_OPTIONS = [
     enabled: qwebirc.ui.supportsFocus
   }],
   [2, "DEDICATED_MSG_WINDOW", "Send privmsgs to dedicated messages window", false],
-  [4, "DEDICATED_NOTICE_WINDOW", "Send notices to dedicated message window", false],
+  /* [4, "DEDICATED_NOTICE_WINDOW", "Send notices to dedicated message window", false], */
+  [4, "DEDICATED_NOTICE_WINDOW", "Send notices to dedicated message window", true], // JRBL
   [3, "NICK_OV_STATUS", "Show status (@/+) before nicknames in channel lines", true],
   [5, "ACCEPT_SERVICE_INVITES", "Automatically join channels when invited by Q", true, {
     settableByURL: false
   }],
-  [6, "USE_HIDDENHOST", "Hide your hostmask when authed to Q (+x)", true, {
-    settableByURL: false
-  }],
+  /* [6, "USE_HIDDENHOST", "Hide your hostmask when authed to Q (+x)", true, { 
+    settableByURL: false 
+  }], */
+  [6, "USE_HIDDENHOST", "Hide your hostmask when authed to Q (+x)", true, { settableByURL: true }], // JRBL
   [8, "LASTPOS_LINE", "Show a last position indicator for each window", true, {
     enabled: qwebirc.ui.supportsFocus
   }],
-  [9, "NICK_COLOURS", "Automatically colour nicknames", false],
+  /* [9, "NICK_COLOURS", "Automatically colour nicknames", false], */
+  [9, "NICK_COLOURS", "Automatically colour nicknames", true], // JRBL
   [10, "HIDE_JOINPARTS", "Hide JOINS/PARTS/QUITS", true],
   [11, "STYLE_HUE", "Adjust user interface hue", function() {
     return {class_: qwebirc.config.HueOption, default_: 210};
@@ -49,6 +52,7 @@ qwebirc.config.DEFAULT_OPTIONS = [
       ui.setModifiableStylesheetValues({hue: value});
     }
   }],
+  /* [12, "QUERY_ON_NICK_CLICK", "Query on nickname click in channel", false], */
   [12, "QUERY_ON_NICK_CLICK", "Query on nickname click in channel", false],
   [13, "SHOW_NICKLIST", "Show nickname list in channels", true],
   [14, "SHOW_TIMESTAMPS", "Show timestamps", true] /* we rely on the hue update */
@@ -443,8 +447,14 @@ qwebirc.ui.SuppliedArgOptions = new Class({
       var checksum = arg.substr(arg.length - 2, 2);
       var decoded = qwebirc.util.b64Decode(arg.substr(0, arg.length - 2));
       
-      if(decoded && (new qwebirc.util.crypto.MD5().digest(decoded).slice(0, 2) == checksum))
-        p = qwebirc.util.parseURI("?" + decoded);
+      //if(decoded && (new qwebirc.util.crypto.MD5().digest(decoded).slice(0, 2) == checksum))
+      //  p = qwebirc.util.parseURI("?" + decoded);
+      if(decoded && (new qwebirc.util.crypto.MD5().digest(decoded).slice(0, 2) == checksum)) {
+        var p2 = qwebirc.util.parseURI("?" + decoded);
+        for(var k in p2) {
+          p[k] = JSON.decode(p2[k], true);
+        }
+      }
     }
     
     this.parsedOptions = p;
@@ -464,7 +474,8 @@ qwebirc.ui.SuppliedArgOptions = new Class({
     var result = [];
     this.getOptionList().forEach(function(x) {
       if(x.settableByURL && x.default_ != x.value)
-        result.push(x.optionId + "=" + x.value);
+        //result.push(x.optionId + "=" + x.value);
+        result.push(x.optionId + "=" + JSON.encode(x.value));
     }.bind(this));
     
     var raw = result.join("&");

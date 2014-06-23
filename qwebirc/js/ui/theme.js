@@ -11,7 +11,8 @@ qwebirc.ui.themes.ThemeControlCodeMap = {
 };
 
 qwebirc.ui.themes.Default = {
-  "PREFIX": ["$C4==$O "],
+  //"PREFIX": ["$C4==$O "],
+  "PREFIX": [""], // JRBL 
   "SIGNON": ["Signed on!", true],
   "CONNECT": ["Connected to server.", true],
   "RAW": ["$m", true],
@@ -19,23 +20,38 @@ qwebirc.ui.themes.Default = {
   "ERROR": ["ERROR: $m", true],
   "SERVERNOTICE": ["$m", true],
   "JOIN": ["${$N$} [$h] has joined $c", true],
-  "OURJOIN": ["${$N$} [$h] has joined $c", true],
-  "PART": ["${$N$} [$h] has left $c [$m]", true],
-  "KICK": ["${$v$} was kicked from $c by ${$N$} [$m]", true],
-  "MODE": ["mode/$c [$m] by ${$N$}", true],
-  "QUIT": ["${$N$} [$h] has quit [$m]", true],
-  "NICK": ["${$n$} has changed nick to ${$[$w$]$}", true],
-  "TOPIC": ["${$N$} changed the topic of $c to: $m", true],
+  //"OURJOIN": ["${$N$} [$h] has joined $c", true],
+  "OURJOIN": ["${$N$} has joined chat.", true], // JRBL & GGG
+  "WELCOME": ["Welcome, here are some tips on how to use chat.", true], // GGG
+  "MENTIONS": ["Mentions: Type a username or autocomplete with 'tab' to mention specific users and alert them of your message.", true], // GGG
+  "ICONS": ["Icons: Hover over the tree icon at the bottom right to select and add an icon to your message.", true], // GGG
+  //"PART": ["${$N$} [$h] has left $c [$m]", true],
+  "PART": ["${$N$} has left chat.", true], // JRBL & GGG
+  //"KICK": ["${$v$} was kicked from $c by ${$N$} [$m]", true],
+  "KICK": ["${$v$} was kicked out by ${$N$} [$m]", true], // JRBL && GGG
+  //"MODE": ["mode/$c [$m] by ${$N$}", true], 
+  "MODE": ["You were given permissions [$m] by ${$N$}.", true],  // JRBL & GGG
+  //"MODE": ["", true], // JRBL experiment
+  //"QUIT": ["${$N$} [$h] has quit [$m]", true],
+  "QUIT": ["${$N$} has quit [$m]", true], // JRBL & GGG
+  //"NICK": ["${$n$} has changed nick to ${$[$w$]$}", true],
+  "NICK": ["${$n$} has a new nickname. Call me ${$[$w$]$}.", true], // JRBL & GGG
+  //"TOPIC": ["${$N$} changed the topic of $c to: $m", true],
+  "TOPIC": ["${$N$} changed the topic to: $m", true], // JRBL & GGG
   "UMODE": ["Usermode change: $m", true],
   "INVITE": ["$N invites you to join $c", true],
   "HILIGHT": ["$C4"],
   "HILIGHTEND": ["$O"],
-  "CHANMSG": ["<${$@$($N$)$}> $m"],
-  "PRIVMSG": ["<$($N$)> $m"],
+  /*"CHANMSG": ["<${$@$($N$)$}> $m"],
+  "PRIVMSG": ["<$($N$)> $m"], */
+  "CHANMSG": ["${$@$($N$)$} $m"], // JRBL & GGG remove angle braces & @
+  "PRIVMSG": ["$($N$) $m"], // JRBL & GGG remove angle braces
   "CHANNOTICE": ["-${$($N$)$}:$c- $m"],
   "PRIVNOTICE": ["-$($N$)- $m"],
-  "OURCHANMSG": ["<$@$N> $m"],
-  "OURPRIVMSG": ["<$N> $m"],
+  /*"OURCHANMSG": ["<$@$N> $m"],
+  "OURPRIVMSG": ["<$N> $m"], */
+  "OURCHANMSG": ["$@$N $m"], // JRBL & GGG remove angle braces & @
+  "OURPRIVMSG": ["$N $m"], // JRBL & GGG remove angle braces
   "OURTARGETEDMSG": ["*$[$t$]* $m"],
   "OURTARGETEDNOTICE": ["[notice($[$t$])] $m"],
   "OURCHANNOTICE": ["-$N:$t- $m"],

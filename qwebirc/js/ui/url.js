@@ -33,15 +33,16 @@ qwebirc.ui.urlificate = function(element, text, execfn, cmdfn, window) {
     addedText.push(newtext);
     var punct = text.substring(newtext.length);
 
+    /* JRBL TODO doesn't think this is good behavior for us */
     var a = new Element("span");
     a.href = "#";
     a.addClass("hyperlink-channel");
-    a.addEvent("click", function(e) {
-      new Event(e).stop();
-      execfn("/JOIN " + newtext);
-    });
+    //a.addEvent("click", function(e) { // GGG turned off channel hotlinking
+    //  new Event(e).stop();
+    //  execfn("/JOIN " + newtext);
+    //}); 
     a.appendChild(document.createTextNode(newtext));
-    element.appendChild(a);
+    element.appendChild(a); 
     
     return punct;
   };
@@ -91,13 +92,12 @@ qwebirc.ui.urlificate = function(element, text, execfn, cmdfn, window) {
     var a = new Element(elementType);
     if(addClass)
       a.addClass("hyperlink-" + addClass);
-      
-    if(url) {
+    
+    if(url)
       a.href = url;
     
-      if(target)
-        a.target = target;
-    }
+    if(target)
+      a.target = target;
     addedText.push(disptext);
     a.appendChild(document.createTextNode(disptext));
     

@@ -7,7 +7,7 @@ qwebirc.irc.IRCClient = new Class({
   },
   initialize: function(options, ui) {
     this.parent(options);
-
+    
     this.ui = ui;
 
     this.prefixes = "@+";
@@ -29,7 +29,7 @@ qwebirc.irc.IRCClient = new Class({
   newLine: function(window, type, data) {
     if(!data)
       data = {};
-      
+    
     var w = this.getWindow(window);
     if(w) {
       w.addLine(type, data);
@@ -47,14 +47,19 @@ qwebirc.irc.IRCClient = new Class({
     }
     extra["c"] = channel;
     extra["-"] = this.nickname;
+    if (extra['n'] === this.nickname) {
+        extra['our'] = true;
+    } else {
+        extra['our'] = false;
+    }
     
     if(!(this.ui.uiOptions.NICK_OV_STATUS))
       delete extra["@"];
-      
+    
     this.newLine(channel, type, extra);
   },
   newServerLine: function(type, data) {
-    this.statusWindow.addLine(type, data);
+    // JRBL & GGG // this.statusWindow.addLine(type, data);
   },
   newActiveLine: function(type, data) {
     this.getActiveWindow().addLine(type, data);
@@ -118,7 +123,8 @@ qwebirc.irc.IRCClient = new Class({
     if(!w) {
       w = this.windows[this.toIRCLower(name)] = this.ui.newWindow(this, type, name);
       
-      // dcc - Prepopulate based on ircd activity log
+      // dcoatzee - Prepopulate based on ircd activity log
+      // FIXME: Does this work, JRBL & GGG?
       try {
         if (type == qwebirc.ui.WINDOW_CHANNEL) {
           // Make synchronous so that past messages appear before any new ones
@@ -292,6 +298,9 @@ qwebirc.irc.IRCClient = new Class({
 
     if(nick == this.nickname) {
       this.newChanLine(channel, "OURJOIN", user);
+      this.newChanLine(channel, "WELCOME", user);
+      this.newChanLine(channel, "MENTIONS", user);
+      this.newChanLine(channel, "ICONS", user);
     } else {
       if(!this.ui.uiOptions.HIDE_JOINPARTS) {
         this.newChanLine(channel, "JOIN", user);
@@ -379,7 +388,7 @@ qwebirc.irc.IRCClient = new Class({
     
     if(oldnick == this.nickname)
       this.nickname = newnick;
-      
+    
     this.tracker.renameNick(oldnick, newnick);
 
     var channels = this.tracker.getNick(newnick);
@@ -456,8 +465,10 @@ qwebirc.irc.IRCClient = new Class({
   },
   channelPrivmsgDate: function(user, channel, message, date) {
     var nick = user.hostToNick();
-
+    
+    //this.tracker.updateLastSpoke(nick, channel, new Date().getTime()); 
     this.tracker.updateLastSpoke(nick, channel, date); 
+    //this.newChanLine(channel, "CHANMSG", user, {"m": message, "@": this.getNickStatus(channel, nick)});
     this.newChanLine(channel, "CHANMSG", user, {"m": message, "@": this.getNickStatus(channel, nick), "date": date});
   },
   channelPrivmsg: function(user, channel, message) {
@@ -640,7 +651,6 @@ qwebirc.irc.IRCClient = new Class({
     if(type == "user") {
       mtype = "USER";
       ndata.h = data.ident + "@" + data.hostname;
-      xsend();
       mtype = "REALNAME";
       ndata.m = data.realname;
     } else if(type == "server") {

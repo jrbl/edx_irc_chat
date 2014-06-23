@@ -12,11 +12,15 @@ qwebirc.irc.NicknameValidator = new Class({
     var r = [];
     
     var max = Math.min(this.options.maxLen, nick.length);
-    var exploded = nick.split("");
+    var exploded = nick.substring(0, max).split(""); // GGG trim nick to length
+    if (this.options.validFirstChar.indexOf(exploded[0]) == -1) {
+      r.push("_");
+    }
+    
     for(var i=0;i<max;i++) {
       var c = exploded[i];
       
-      var valid = i == 0 ? this.options.validFirstChar : this.options.validSubChars;
+      var valid = this.options.validSubChars;
       if(valid.indexOf(c) != -1 || permitDot && c == ".") {
         r.push(c);
       } else {
@@ -26,6 +30,7 @@ qwebirc.irc.NicknameValidator = new Class({
 
     while(r.length < this.options.minLen)
       r.push("_");  /* yeah we assume this is valid... */
+    
     return r.join("");
   }
 });
