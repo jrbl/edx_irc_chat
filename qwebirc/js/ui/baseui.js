@@ -58,10 +58,12 @@ qwebirc.ui.BaseUI = new Class({
     this.selectWindow(w);
     if(!this.firstClient) {
       this.firstClient = true;
-      w.addLine("", "qwebirc v" + qwebirc.VERSION);
+      w.addLine("", "Code forked by Stanford University from: qwebirc v" + qwebirc.VERSION);
       w.addLine("", "Copyright (C) 2008-2012 Chris Porter and the qwebirc project.");
       w.addLine("", "http://www.qwebirc.org");
       w.addLine("", "Licensed under the GNU General Public License, Version 2.");
+      w.addLine("", "");
+      w.addLine("", "Please Refresh your browser.");
     }
     return w;
   },
@@ -477,7 +479,7 @@ qwebirc.ui.QuakeNetUI = new Class({
   }
 });
 
-qwebirc.ui.RootUI = qwebirc.ui.QuakeNetUI;
+qwebirc.ui.RootUI = qwebirc.ui.QuakeNetUI; // JRBL: NOTE THIS IS TERRIBLE BUT!!! IT MEANS WE CAN FIX A LOT BY SUBCLASSING THIS THING
 
 qwebirc.ui.RequestTransformHTML = function(options) {
   var HREF_ELEMENTS = {

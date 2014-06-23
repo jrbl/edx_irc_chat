@@ -9,6 +9,7 @@ qwebirc.ui.Colourise = function(line, entity, execfn, cmdfn, window) {
   var xline = line.split("");
   var element = document.createElement("span");
 
+  element.addClass("message");
   entity.addClass("colourline");
   
   function isNum(x) {

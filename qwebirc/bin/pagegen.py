@@ -74,6 +74,7 @@ def producehtml(name, debug):
   <script type="text/javascript">
     var ui = new qwebirc.ui.Interface("ircui", qwebirc.ui.%s, %s);
   </script>
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"> <!-- GGG: added FontAWesome -->
 </head>
 <body>
   <div id="ircui">

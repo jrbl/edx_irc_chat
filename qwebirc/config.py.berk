@@ -18,7 +18,7 @@ from qwebirc.config_options import *
 #         Hostname (or IP address) of IRC server to connect to.
 # OPTION: IRCPORT
 #         Port of IRC server to connect to.
-IRCSERVER, IRCPORT = "10.0.31.99", 6667
+IRCSERVER, IRCPORT = "cs1692x.moocforums.org", 6667
 
 # OPTION: SSLPORT
 #         SSL port of IRC server to connect to.
@@ -27,7 +27,7 @@ IRCSERVER, IRCPORT = "10.0.31.99", 6667
 
 # OPTION: REALNAME
 #         The realname field of IRC clients will be set to this value.
-REALNAME = "http://class.stanford.edu"
+REALNAME = "http://cs1692x.moocforums.org/"
 
 # OPTION: IDENT
 #        ident to use on irc, possible values include:
@@ -72,13 +72,12 @@ IDENT = "webchat"
 #         - the literal value None, i.e. WEBIRC_MODE = None
 #           Send the IP and hostname in the realname field, overrides
 #          the REALNAME option.
-#WEBIRC_MODE = None
-WEBIRC_MODE = "webirc"
+WEBIRC_MODE = None
 
 # OPTION: WEBIRC_PASSWORD
 #         Used for WEBIRC_MODE webirc and cgiirc, see WEBIRC_MODE
 #         option documentation.
-WEBIRC_PASSWORD = "webirc_badpass"
+#WEBIRC_PASSWORD = "fish"
 
 # OPTION: CGIIRC_STRING
 #         Command sent to IRC server in for cgiirc WEBIRC_MODE.
@@ -91,12 +90,12 @@ WEBIRC_PASSWORD = "webirc_badpass"
 # OPTION: BASE_URL
 #         URL that this qwebirc instance will be available at, add the
 #         port number if your instance runs on a port other than 80.
-BASE_URL = "https://stage.class.stanford.edu:9090"
+BASE_URL = "http://cs1692x.moocforums.org:9090/"
 
 # OPTION: NETWORK_NAME
 #         The name of your IRC network, displayed throughout the
 #         application.
-NETWORK_NAME = "StanfordOnline"
+NETWORK_NAME = "CS169.2x"
 
 # OPTION: ANALYTICS_HTML
 #         If you have an analytics service, you can paste the HTML
@@ -106,7 +105,7 @@ NETWORK_NAME = "StanfordOnline"
 
 # OPTION: APP_TITLE
 #         The title of the application in the web browser.
-APP_TITLE = NETWORK_NAME + "WebIRC"
+APP_TITLE = NETWORK_NAME + " Web IRC"
 
 # NICKNAME VALIDATION OPTIONS
 # ---------------------------------------------------------------------
@@ -115,8 +114,7 @@ APP_TITLE = NETWORK_NAME + "WebIRC"
 #         If True then user nicknames will be validated according to
 #         the configuration below, otherwise they will be passed
 #         directly to the ircd.
-#NICKNAME_VALIDATE = False
-NICKNAME_VALIDATE = True
+NICKNAME_VALIDATE = False
 
 # OPTION: NICKNAME_VALID_FIRST_CHAR
 #         A string containing valid characters for the first letter of
@@ -138,8 +136,7 @@ NICKNAME_MINIMUM_LENGTH = 2
 #         Maximum characters permitted in a nickname on your network.
 #         Ideally we'd extract this from the ircd, but we need to know
 #         before we connect.
-############NICKNAME_MAXIMUM_LENGTH = 15 ##### JRBL changed this when he recompiled the ircd
-NICKNAME_MAXIMUM_LENGTH = 31 ##### JRBL changed this when he recompiled the ircd
+NICKNAME_MAXIMUM_LENGTH = 15
 
 # FEEDBACK OPTIONS
 # ---------------------------------------------------------------------
@@ -149,11 +146,11 @@ NICKNAME_MAXIMUM_LENGTH = 31 ##### JRBL changed this when he recompiled the ircd
 #
 # OPTION: FEEDBACK_FROM
 #         E-mail address that feedback will originate from.
-FEEDBACK_FROM = "openedx-dev@lists.stanford.edu"
+FEEDBACK_FROM = "dcoetzee@eecs.berkeley.edu"
 
 # OPTION: FEEDBACK_TO:
 #         E-mail address that feedback will be sent to.
-FEEDBACK_TO = "openedx-dev@lists.stanford.edu"
+FEEDBACK_TO = "dcoetzee@eecs.berkeley.edu"
 
 # OPTION: FEEDBACK_SMTP_HOST
 #         Hostname/IP address of SMTP server feedback will be sent
@@ -190,14 +187,12 @@ ADMIN_ENGINE_HOSTS = ["127.0.0.1"]
 # OPTION: ARGS (optional)
 #         These arguments will be used as if qwebirc was run directly
 #         with them, see run.py --help for a list of options.
-#ARGS = "-s"
 #ARGS = "-n -p 3989"
 
 # OPTION: SYSLOG_ADDR (optional)
 #         Used in conjunction with util/syslog.py and -s option.
 #         This option specifies the address and port that syslog
 #         datagrams will be sent to.
-SYSLOG_ADDR = "127.0.0.1", 514
 #SYSLOG_ADDR = "127.0.0.1", 514
 
 # TUNEABLE VALUES
@@ -310,7 +305,7 @@ AUTH_OK_REGEX = "^You are now logged in as [^ ]+\\.$"
 # OPTION: AUTHGATEPROVIDER
 #         Authgate module to use, normally imported directly.
 #         dummyauthgate does nothing.
-rt dummyauthgate as AUTHGATEPROVIDER
+import dummyauthgate as AUTHGATEPROVIDER
 
 # OPTION: IRCD_ACTIVITY_LOG_URL
 #         An activity log is emitted by a modified IRC server and logs
@@ -318,4 +313,4 @@ rt dummyauthgate as AUTHGATEPROVIDER
 #         past events that occurred in a given channel. It can be used
 #         by the webclient to show recent history when joining a
 #         channel.
-IRCD_ACTIVITY_LOG_URL = "https://privateprod.class.stanford.edu/chat_server/chatlog/raw/"
+IRCD_ACTIVITY_LOG_URL = "http://cs1692x.moocforums.org/chatlog/raw/"
