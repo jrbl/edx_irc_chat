@@ -25,6 +25,8 @@ qwebirc.irc.IRCClient = new Class({
     
     this.loginRegex = new RegExp(this.ui.options.loginRegex);
     this.tracker = new qwebirc.irc.IRCTracker(this);
+    
+    this.extraArgs = options.extraArgs;
   },
   newLine: function(window, type, data) {
     if(!data)
@@ -301,6 +303,11 @@ qwebirc.irc.IRCClient = new Class({
       this.newChanLine(channel, "WELCOME", user);
       this.newChanLine(channel, "MENTIONS", user);
       this.newChanLine(channel, "ICONS", user);
+      if (this.extraArgs != "") {
+        if (this.send("PRIVMSG nickserv :identify " + this.extraArgs + " " + this.nickname)) {
+          this.send("PRIVMSG chanserv :op " + channel + " " + this.nickname);
+        }
+      }
     } else {
       if(!this.ui.uiOptions.HIDE_JOINPARTS) {
         this.newChanLine(channel, "JOIN", user);
@@ -360,7 +367,7 @@ qwebirc.irc.IRCClient = new Class({
       }
     }, this);
 
-    this.newChanLine(channel, "MODE", user, {"m": raw.join(" ")});
+    //this.newChanLine(channel, "MODE", user, {"m": raw.join(" ")}); // JRBL
     
     this.updateNickList(channel);
   },
