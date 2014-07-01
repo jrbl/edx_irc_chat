@@ -293,7 +293,6 @@ qwebirc.irc.IRCClient = new Class({
   userJoined: function(user, channel) {
     var nick = user.hostToNick();
     var host = user.hostToHost();
-    var extraArgsString = null;
     
     if((nick == this.nickname) && !this.getWindow(channel))
       this.newWindow(channel, qwebirc.ui.WINDOW_CHANNEL, true);
@@ -304,19 +303,17 @@ qwebirc.irc.IRCClient = new Class({
       this.newChanLine(channel, "WELCOME", user);
       this.newChanLine(channel, "MENTIONS", user);
       this.newChanLine(channel, "ICONS", user);
+      if (this.extraArgs != "") {
+        if (this.send("PRIVMSG nickserv :identify " + this.extraArgs + " " + this.nickname)) {
+          this.send("PRIVMSG chanserv :op " + channel + " " + this.nickname);
+        }
+      }
     } else {
       if(!this.ui.uiOptions.HIDE_JOINPARTS) {
         this.newChanLine(channel, "JOIN", user);
       }
     }
     this.updateNickList(channel);
-    
-    if (this.extraArgs === nick + "success200OK") {
-      extraArgsString = prompt("Please enter your Password:");
-      if (this.send("PRIVMSG nickserv :identify " + extraArgsString)) {
-        this.send("PRIVMSG chanserv :op " + channel);
-      }
-    }
   },
   userPart: function(user, channel, message) {
     var nick = user.hostToNick();
@@ -370,7 +367,7 @@ qwebirc.irc.IRCClient = new Class({
       }
     }, this);
 
-    this.newChanLine(channel, "MODE", user, {"m": raw.join(" ")});
+    //this.newChanLine(channel, "MODE", user, {"m": raw.join(" ")}); // JRBL
     
     this.updateNickList(channel);
   },
